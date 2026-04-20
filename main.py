@@ -11,6 +11,11 @@ ventana.geometry("1000x400")
 ventana.configure(bg="lightblue")
 combinacion_adivinanza = [random.randint(0, 9) for _ in range(3)]
 nombre_jugador = tk.StringVar()
+def ganastecomputadora(num_intentos, numero):
+    messagebox.showinfo(
+        "Ganaste",
+        f"Adivino el numero {numero} en {num_intentos} intentos."
+    )
 def pontunombre():
     ventana_nueva = tk.Toplevel(ventana)
     ventana_nueva.title("Ingresa tu nombre")
@@ -177,10 +182,34 @@ def mostrar_mensajeComputadora():
 
     entrada_numero = tk.Entry(ventana_nueva, width=25)
     entrada_numero.pack(pady=5)
+    intentoslabel = tk.Label(
+        ventana_nueva,
+        text="",
+        bg="lightblue"
+    )
+    intentoslabel.pack(pady=5)
 
     def procesar_adivinanzas():
         numero = entrada_numero.get()
-        messagebox.showinfo("Numero ingresado", f"Numero: {numero}")
+        if len(numero) == 3 and numero.isdigit():
+            bajo = 0
+            alto = 999
+            contador = 0
+            objetivo = int(numero)
+            while True:
+                intento = (bajo + alto) // 2
+                contador += 1
+                intentoslabel.config(text=intentoslabel.cget("text") + f"\nLa computadora intenta: {intento:03d}")
+                if intento == objetivo:
+                    ganastecomputadora(contador, numero)
+                    break
+                elif intento > objetivo:
+                    alto = intento - 1
+                else:
+                 bajo = intento + 1
+        else:
+            messagebox.showerror("Error", "Por favor, ingresa un numero de 3 digitos.")
+            return
 
     tk.Button(
         ventana_nueva,
