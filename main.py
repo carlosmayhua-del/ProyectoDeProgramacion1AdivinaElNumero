@@ -1,9 +1,10 @@
+import os
 import random
+from collections import Counter
+
+import pandas as pds
 import tkinter as tk
 from tkinter import messagebox
-import pandas as pds
-import os 
-os.path.exists("alo.csv")
 
 ventana = tk.Tk()
 ventana.title("Juego de Adivinanza")
@@ -11,11 +12,29 @@ ventana.geometry("1000x400")
 ventana.configure(bg="lightblue")
 combinacion_adivinanza = [random.randint(0, 9) for _ in range(3)]
 nombre_jugador = tk.StringVar()
+
+
+def calcular_pista(combinacion_a, combinacion_b):
+    copia = combinacion_b.copy()
+    pista = 0
+    for numero in combinacion_a:
+        if numero in copia:
+            pista += 1
+            copia.remove(numero)
+    return pista
+
+
+def generar_jugadas_posibles():
+    return [[int(digito) for digito in f"{numero:03d}"] for numero in range(1000)]
+
+
 def ganastecomputadora(num_intentos, numero):
     messagebox.showinfo(
         "Ganaste",
         f"Adivino el numero {numero} en {num_intentos} intentos."
     )
+
+
 def pontunombre():
     ventana_nueva = tk.Toplevel(ventana)
     ventana_nueva.title("Ingresa tu nombre")
@@ -64,6 +83,10 @@ def guardar_resultado(nombre, num_intentos):
     )
 
 def mostrar_Top_adivinadores():
+    if not os.path.exists("alo.csv"):
+        messagebox.showinfo("Top Adivinadores", "Todavia no hay resultados guardados.")
+        return
+
     ventana_nueva = tk.Toplevel(ventana)
     ventana_nueva.title("Top Adivinadores")
     ventana_nueva.geometry("400x300")
@@ -81,11 +104,10 @@ def mostrar_Top_adivinadores():
         font=("Arial", 12),
         justify="left"
     ).pack(pady=10)
-    pass
 
-    if not os.path.exists("alo.csv"):
-        top_adivinadores = "Todavia no hay resultados guardados."
+
 def mostrar_mensajeAdivinador():
+    combinacion_secreta = [random.randint(0, 9) for _ in range(3)]
     ventana_nueva = tk.Toplevel(ventana)
     ventana_nueva.title("Ingresa tus adivinanzas")
     ventana_nueva.geometry("450x350")
@@ -135,23 +157,19 @@ def mostrar_mensajeAdivinador():
         num_intentos += 1
         historial_intentos.append("".join(map(str, intento_usuario)))
 
-        lista_pistas = []     
+        lista_pistas = []
         if intento_usuario == [6, 6, 6]:
             lista_pistas.append("Has ingresado el numero secreto para ganar automaticamente.")
-        for posicion, numero_usuario in enumerate(intento_usuario):
-            if numero_usuario == combinacion_adivinanza[posicion]:
-                lista_pistas.append(f"El {numero_usuario} esta en la posicion correcta ({posicion}).")
-            elif numero_usuario in combinacion_adivinanza:
-                    lista_pistas.append(f"El {numero_usuario} es correcto, pero esta en otra posicion.")
-            else:
-                lista_pistas.append(f"El {numero_usuario} no esta en la combinacion.")
+
+        pista = calcular_pista(intento_usuario, combinacion_secreta)
+        lista_pistas.append(f"Hay {pista} numeros en la combinacion.")
 
         resultado_label.config(
             text="\n".join(lista_pistas + ["", f"Intentos: {', '.join(historial_intentos)}"])
         )
 
-        if intento_usuario == combinacion_adivinanza or intento_usuario == [6, 6, 6]:
-            combinacion_ganadora = "".join(map(str, combinacion_adivinanza))
+        if intento_usuario == combinacion_secreta or intento_usuario == [6, 6, 6]:
+            combinacion_ganadora = "".join(map(str, combinacion_secreta))
             messagebox.showinfo(
                 "Ganaste",
                 f"Adivinaste el numero {combinacion_ganadora} en {num_intentos} intentos."
@@ -171,7 +189,7 @@ def mostrar_mensajeAdivinador():
 def mostrar_mensajeComputadora():
     ventana_nueva = tk.Toplevel(ventana)
     ventana_nueva.title("Ingresa el numero que quieres que adivine la computadora")
-    ventana_nueva.geometry("350x250")
+    ventana_nueva.geometry("500x420")
     ventana_nueva.configure(bg="lightblue")
 
     tk.Label(
@@ -185,28 +203,37 @@ def mostrar_mensajeComputadora():
     intentoslabel = tk.Label(
         ventana_nueva,
         text="",
-        bg="lightblue"
+        bg="lightblue",
+        justify="left"
     )
     intentoslabel.pack(pady=5)
 
     def procesar_adivinanzas():
         numero = entrada_numero.get()
         if len(numero) == 3 and numero.isdigit():
-            bajo = 0
-            alto = 999
+            numero_secreto = [int(digito) for digito in numero]
+            jugadas_pc = generar_jugadas_posibles()
             contador = 0
-            objetivo = int(numero)
+            historial_pc = []
+
             while True:
-                intento = (bajo + alto) // 2
+                intento_pc = jugadas_pc[0]
                 contador += 1
-                intentoslabel.config(text=intentoslabel.cget("text") + f"\nLa computadora intenta: {intento:03d}")
-                if intento == objetivo:
+                historial_pc.append(f"Intento {contador}: {''.join(map(str, intento_pc))}")
+
+                if Counter(intento_pc) == Counter(numero_secreto):
+                    intentoslabel.config(text="\n".join(historial_pc))
                     ganastecomputadora(contador, numero)
                     break
-                elif intento > objetivo:
-                    alto = intento - 1
-                else:
-                 bajo = intento + 1
+
+                pista = calcular_pista(intento_pc, numero_secreto)
+                sospechosos = []
+                for jugada in jugadas_pc:
+                    if calcular_pista(intento_pc, jugada) == pista:
+                        sospechosos.append(jugada)
+
+                jugadas_pc = sospechosos
+                intentoslabel.config(text="\n".join(historial_pc))
         else:
             messagebox.showerror("Error", "Por favor, ingresa un numero de 3 digitos.")
             return
