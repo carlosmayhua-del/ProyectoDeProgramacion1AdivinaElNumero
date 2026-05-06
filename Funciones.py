@@ -162,29 +162,29 @@ def mostrar_mensajeComputadora(ventana, ganastecomputadora):
             messagebox.showerror("Error", "Por favor, ingresa un numero de 3 digitos.")
             return
 
-        numero_secreto = [int(digito) for digito in numero]
-        jugadas_pc = generar_jugadas_posibles()
-        contador = 0
-        historial_pc = []
+        import threading
 
-        while True:
-            intento_pc = jugadas_pc[0]
-            contador += 1
-            historial_pc.append(f"Intento {contador}: {''.join(map(str, intento_pc))}")
+        def correr_algoritmo():
+            numero_secreto = [int(digito) for digito in numero]
+            jugadas_pc = generar_jugadas_posibles()
+            contador = 0
+            historial_pc = []
 
-            if Counter(intento_pc) == Counter(numero_secreto):
+            while True:
+                intento_pc = random.choice(jugadas_pc)
+                contador += 1
+                historial_pc.append(f"Intento {contador}: {''.join(map(str, intento_pc))}")
+
+                if intento_pc == numero_secreto:
+                    intentoslabel.config(text="\n".join(historial_pc))
+                    ventana_nueva.after(0, lambda c=contador, n=numero: ganastecomputadora(c, n))
+                    break
+
+                pista = calcular_pista(intento_pc, numero_secreto)
+                jugadas_pc = [jugada for jugada in jugadas_pc if calcular_pista(intento_pc, jugada) == pista]
                 intentoslabel.config(text="\n".join(historial_pc))
-                ganastecomputadora(contador, numero)
-                break
 
-            pista = calcular_pista(intento_pc, numero_secreto)
-            sospechosos = []
-            for jugada in jugadas_pc:
-                if calcular_pista(intento_pc, jugada) == pista:
-                    sospechosos.append(jugada)
-
-            jugadas_pc = sospechosos
-            intentoslabel.config(text="\n".join(historial_pc))
+        threading.Thread(target=correr_algoritmo, daemon=True).start()
 
     tk.Button(
         ventana_nueva,
@@ -238,6 +238,3 @@ def ejecutar_juego_consola():
 
         mostrar_victoria(intento_pc, numero_secreto, jugadas_pc, contador)
 
-
-if __name__ == "__main__":
-    ejecutar_juego_consola()
