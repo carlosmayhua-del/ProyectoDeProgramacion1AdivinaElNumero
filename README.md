@@ -13,7 +13,7 @@ El juego tiene 3 opciones principales:
    El usuario escribe un numero y la computadora intenta adivinarlo mostrando sus intentos.
 
 3. `Ver Top Adivinadores`
-   Muestra los resultados guardados en el archivo `alo.csv`.
+   Muestra los resultados guardados en el archivo `top.csv`.
 
 ## Estructura del codigo
 
@@ -27,7 +27,7 @@ Se encarga de:
 - Mostrar el titulo y la descripcion del juego.
 - Crear los botones principales.
 - Pedir el nombre del jugador cuando gana.
-- Guardar resultados en `alo.csv`.
+- Guardar resultados en `top.csv`.
 - Mostrar la tabla de mejores intentos.
 - Llamar a las funciones del archivo `Funciones.py`.
 
@@ -87,7 +87,7 @@ Esta funcion:
 
 ### `mostrar_Top_adivinadores()`
 
-Lee el archivo `alo.csv` y muestra los nombres con sus intentos guardados.
+Lee el archivo `top.csv` y muestra los nombres con sus intentos guardados.
 
 ## Flujo general del programa
 
@@ -122,13 +122,13 @@ Aqui el usuario escribe un numero secreto y la computadora muestra sus intentos 
 
 ![Top adivinadores](assets/readme/top_adivinadores.png)
 
-Aqui se muestran los resultados guardados en `alo.csv`.
+Aqui se muestran los resultados guardados en `top.csv`.
 
 ## Archivos importantes
 
 - [main.py](main.py)
 - [Funciones.py](Funciones.py)
-- [alo.csv](alo.csv)
+- [top.csv](top.csv)
 
 ## Tecnologias usadas
 

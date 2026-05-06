@@ -59,14 +59,14 @@ def guardar_resultado(nombre, num_intentos):
         "Nombre": [nombre],
         "Intentos": [num_intentos]
     }).to_csv(
-        "alo.csv",
+        "top.csv",
         mode="a",
-        header=not os.path.exists("alo.csv"),
+        header=not os.path.exists("top.csv"),
         index=False
     )
 
 def mostrar_Top_adivinadores():
-    if not os.path.exists("alo.csv"):
+    if not os.path.exists("top.csv"):
         messagebox.showinfo("Top Adivinadores", "Todavia no hay resultados guardados.")
         return
 
@@ -82,7 +82,7 @@ def mostrar_Top_adivinadores():
     ).pack(pady=10)
     tk.Label(
         ventana_nueva,
-        text= pds.read_csv("alo.csv").to_string(index=False),
+        text= pds.read_csv("top.csv").to_string(index=False),
         bg="lightblue",
         font=("Arial", 12),
         justify="left"
