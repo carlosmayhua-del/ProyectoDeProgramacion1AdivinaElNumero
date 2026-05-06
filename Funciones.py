@@ -165,13 +165,30 @@ def mostrar_mensajeComputadora(ventana, ganastecomputadora):
         import threading
 
         def correr_algoritmo():
+            from itertools import permutations
             numero_secreto = [int(digito) for digito in numero]
             jugadas_pc = generar_jugadas_posibles()
             contador = 0
             historial_pc = []
 
             while True:
-                intento_pc = random.choice(jugadas_pc)
+                # Si todos los candidatos son permutaciones del mismo grupo, probarlas en orden
+                primer_candidato = sorted(jugadas_pc[0])
+                todos_permutaciones = all(sorted(j) == primer_candidato for j in jugadas_pc)
+
+                if todos_permutaciones:
+                    perms = list(dict.fromkeys(tuple(p) for p in permutations(jugadas_pc[0])))
+                    for perm in perms:
+                        intento_pc = list(perm)
+                        contador += 1
+                        historial_pc.append(f"Intento {contador}: {''.join(map(str, intento_pc))}")
+                        intentoslabel.config(text="\n".join(historial_pc))
+                        if intento_pc == numero_secreto:
+                            ventana_nueva.after(0, lambda c=contador, n=numero: ganastecomputadora(c, n))
+                            return
+                    break
+
+                intento_pc = jugadas_pc[0]
                 contador += 1
                 historial_pc.append(f"Intento {contador}: {''.join(map(str, intento_pc))}")
 
